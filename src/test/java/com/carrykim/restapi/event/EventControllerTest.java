@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -60,9 +61,12 @@ public class EventControllerTest {
         //Then
         mockMvc.perform(post("/api/event")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("timestamp").exists())
+                .andExpect(jsonPath("status").exists())
+                .andExpect(jsonPath("error").exists())
+                .andExpect(jsonPath("message").exists());
     }
 }
