@@ -13,6 +13,4 @@ public class Event {
     private Integer id;
     private String name;
     private String description;
-    @Enumerated(EnumType.STRING)
-    private EventStatus eventStatus = EventStatus.DRAFT;
 }
