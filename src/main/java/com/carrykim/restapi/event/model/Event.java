@@ -1,10 +1,8 @@
-package com.carrykim.restapi.event;
+package com.carrykim.restapi.event.model;
 
 import lombok.*;
-import org.hibernate.type.EntityType;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 
 @Getter @Setter
 @EqualsAndHashCode(of = "id") @Builder

@@ -1,5 +1,8 @@
-package com.carrykim.restapi.event;
+package com.carrykim.restapi.event.controller;
 
+import com.carrykim.restapi.event.model.Event;
+import com.carrykim.restapi.event.infra.EventRepository;
+import com.carrykim.restapi.event.model.dto.EventDto;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,9 +26,9 @@ public class EventController {
     }
 
     @PostMapping("")
-    public ResponseEntity create(@RequestBody Event event) {
-        Event newEvent = this.eventRepository.save(event);
-        URI uri = linkTo(methodOn(EventController.class).create(new Event())).slash(newEvent.getId()).toUri();
-        return ResponseEntity.created(uri).body(event);
+    public ResponseEntity create(@RequestBody EventDto eventDto) {
+        Event newEvent = this.eventRepository.save(eventDto.toModel());
+        URI uri = linkTo(methodOn(EventController.class).create(new EventDto())).slash(newEvent.getId()).toUri();
+        return ResponseEntity.created(uri).body(newEvent);
     }
 }
