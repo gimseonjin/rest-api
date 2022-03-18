@@ -1,5 +1,7 @@
 package com.carrykim.restapi.event;
 
+import com.carrykim.restapi.event.infra.EventRepository;
+import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.stream.IntStream;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -26,10 +31,20 @@ public class EventControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private EventRepository eventRepository;
+
 
     private EventDto createEventDto(){
         return EventDto.builder()
                 .name("My Event")
+                .description("This is my first Event")
+                .build();
+    }
+
+    private Event createEvent(int i){
+        return Event.builder()
+                .name("My Event : " + i)
                 .description("This is my first Event")
                 .build();
     }
@@ -72,4 +87,27 @@ public class EventControllerTest {
                 .andExpect(jsonPath("error").exists())
                 .andExpect(jsonPath("message").exists());
     }
+
+    @Test
+    public void get_sorted_event_list_by_paging() throws Exception {
+        // Given
+        IntStream.range(1,30).forEach( i ->{
+            Event event = createEvent(i);
+            this.eventRepository.save(event);
+        });
+
+        //When
+        //Then
+        mockMvc.perform(get("/api/events")
+                        .param("page","1")
+                        .param("size","10")
+                        .param("sort", "name,DESC")
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("page").exists())
+                .andExpect(jsonPath("_embedded.eventResourceList.[0]._links.self").exists());
+    }
+
 }

@@ -4,13 +4,12 @@ import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
 import com.carrykim.restapi.event.model.dto.EventResource;
 import com.carrykim.restapi.event.service.EventService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -30,7 +29,27 @@ public class EventController {
 
     @PostMapping("")
     public ResponseEntity create(@RequestBody @Valid EventDto eventDto) {
-        EventResource eventResource = this.eventService.create(eventDto);
+        Event event = this.eventService.create(eventDto);
+        EventResource eventResource = new EventResource(event);
+        addLinks(eventResource);
+        URI uri = linkTo(methodOn(EventController.class)
+                .create(new EventDto()))
+                .slash(eventResource.getEvent().getId()).toUri();
+        return ResponseEntity.created(uri).body(eventResource);
+    }
+
+    @GetMapping("")
+    public ResponseEntity readAll(Pageable pageable, PagedResourcesAssembler pagedResourcesAssembler) {
+        var result =  pagedResourcesAssembler
+                .toModel(this.eventService.readWithPage(pageable).map(event -> {
+                    EventResource eventResource =  new EventResource(event);
+                    addLinks(eventResource);
+                    return eventResource;
+                }));
+        return ResponseEntity.ok(result);
+    }
+
+    private void addLinks(EventResource eventResource){
         WebMvcLinkBuilder selfAndUpdateLink =  linkTo(methodOn(EventController.class)
                 .create(new EventDto()))
                 .slash(eventResource.getEvent().getId());
@@ -38,7 +57,5 @@ public class EventController {
         eventResource.add(queryLink.withRel("query-events"));
         eventResource.add(selfAndUpdateLink.withRel("update-event"));
         eventResource.add(selfAndUpdateLink.withSelfRel());
-        URI uri = selfAndUpdateLink.toUri();
-        return ResponseEntity.created(uri).body(eventResource);
     }
 }
