@@ -2,8 +2,10 @@ package com.carrykim.restapi.event.controller;
 
 import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
+import com.carrykim.restapi.event.model.dto.EventResource;
 import com.carrykim.restapi.event.service.EventService;
 import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,8 +30,15 @@ public class EventController {
 
     @PostMapping("")
     public ResponseEntity create(@RequestBody @Valid EventDto eventDto) {
-        Event newEvent = this.eventService.create(eventDto);
-        URI uri = linkTo(methodOn(EventController.class).create(new EventDto())).slash(newEvent.getId()).toUri();
-        return ResponseEntity.created(uri).body(newEvent);
+        EventResource eventResource = this.eventService.create(eventDto);
+        WebMvcLinkBuilder selfAndUpdateLink =  linkTo(methodOn(EventController.class)
+                .create(new EventDto()))
+                .slash(eventResource.getEvent().getId());
+        WebMvcLinkBuilder queryLink =  linkTo(methodOn(EventController.class));
+        eventResource.add(queryLink.withRel("query-events"));
+        eventResource.add(selfAndUpdateLink.withRel("update-event"));
+        eventResource.add(selfAndUpdateLink.withSelfRel());
+        URI uri = selfAndUpdateLink.toUri();
+        return ResponseEntity.created(uri).body(eventResource);
     }
 }

@@ -3,6 +3,7 @@ package com.carrykim.restapi.event.service;
 import com.carrykim.restapi.event.infra.EventRepository;
 import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
+import com.carrykim.restapi.event.model.dto.EventResource;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,9 +15,9 @@ public class EventService {
         this.eventRepository = eventRepository;
     }
 
-    public Event create(EventDto eventDto){
+    public EventResource create(EventDto eventDto){
         Event newEvent = eventDto.toModel();
-        return eventRepository.save(newEvent);
+        return new EventResource(eventRepository.save(newEvent));
     }
 
 }
