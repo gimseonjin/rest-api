@@ -16,8 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.stream.IntStream;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -113,9 +112,12 @@ public class EventControllerTest {
 
     @Test
     public void get_event_success() throws Exception {
+        //Given
         Event event = createEvent(0);
         this.eventRepository.save(event);
 
+        //When
+        //Then
         mockMvc.perform(get("/api/events/{id}", event.getId()))
                 .andDo(print())
                 .andExpect(jsonPath("event").exists())
@@ -127,7 +129,73 @@ public class EventControllerTest {
         //Given
         Integer wrongId = 10010;
 
+        //When
+        //Then
         mockMvc.perform(get("/api/events/{id}", wrongId))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("timestamp").exists())
+                .andExpect(jsonPath("status").exists())
+                .andExpect(jsonPath("error").exists())
+                .andExpect(jsonPath("message").exists());
+    }
+
+    @Test
+    public void update_event_success() throws Exception {
+        //Given
+        Event event = createEvent(11123);
+        this.eventRepository.save(event);
+        String newDescription = "new description";
+
+        EventDto eventDto = EventDto.builder()
+                .name(event.getName())
+                .description(newDescription)
+                .build();
+
+        //When
+        //Then
+        mockMvc.perform(put("/api/events/{id}", event.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(jsonPath("event.name").value(event.getName()))
+                .andExpect(jsonPath("event.description").value(newDescription))
+                .andExpect(jsonPath("_links").exists());
+    }
+
+    @Test
+    public void update_event_bad_requset_empty_input() throws Exception {
+        //Given
+        Event event = createEvent(11223);
+        this.eventRepository.save(event);
+
+        EventDto eventDto = EventDto.builder()
+                .build();
+
+        //When
+        //Then
+        mockMvc.perform(put("/api/events/{id}", event.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("timestamp").exists())
+                .andExpect(jsonPath("status").exists())
+                .andExpect(jsonPath("error").exists())
+                .andExpect(jsonPath("message").exists());
+    }
+
+    @Test
+    public void update_event_not_found_wrong_id() throws Exception {
+        //Given
+        Integer wrongId = 10010;
+        EventDto eventDto = createEventDto();
+
+        //When
+        //Then
+        mockMvc.perform(put("/api/events/{id}", wrongId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("timestamp").exists())

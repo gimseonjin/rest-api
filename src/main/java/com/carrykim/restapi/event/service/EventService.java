@@ -36,4 +36,11 @@ public class EventService {
         return findEvent.get();
     }
 
+    public Event update(Integer id, EventDto eventDto){
+        Event event = this.read(id);
+        event.setName(eventDto.getName());
+        event.setDescription(eventDto.getDescription());
+        return this.eventRepository.save(event);
+    }
+
 }
