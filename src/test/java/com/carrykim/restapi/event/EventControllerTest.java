@@ -27,7 +27,7 @@ public class EventControllerTest {
     private ObjectMapper objectMapper;
 
 
-    private EventDto makeEventDto(){
+    private EventDto createEventDto(){
         return EventDto.builder()
                 .name("My Event")
                 .description("This is my first Event")
@@ -35,13 +35,13 @@ public class EventControllerTest {
     }
 
     @Test
-    public void createEvent() throws Exception {
+    public void create_event_success() throws Exception {
         //Given
-        EventDto eventDto = makeEventDto();
+        EventDto eventDto = createEventDto();
 
         //When
         //Then
-        mockMvc.perform(post("/api/event")
+        mockMvc.perform(post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(eventDto)))
@@ -49,17 +49,21 @@ public class EventControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("id").exists())
                 .andExpect(header().exists(HttpHeaders.LOCATION))
-                .andExpect(header().string(HttpHeaders.CONTENT_TYPE,MediaTypes.HAL_JSON_VALUE));
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE,MediaTypes.HAL_JSON_VALUE))
+                .andExpect(jsonPath("_link.self").exists())
+                .andExpect(jsonPath("_link.query-events").exists())
+                .andExpect(jsonPath("_link.update-event").exists())
+        ;
     }
 
     @Test
-    public void createEvent_bad_request_empty_input() throws Exception {
+    public void create_event_bad_request_empty_input() throws Exception {
         //Given
         EventDto eventDto = EventDto.builder().build();
 
         //When
         //Then
-        mockMvc.perform(post("/api/event")
+        mockMvc.perform(post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())

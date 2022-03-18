@@ -11,6 +11,8 @@ import javax.persistence.*;
 public class Event {
     @Id @GeneratedValue
     private Integer id;
+    @Column(unique = true)
     private String name;
+    @Column()
     private String description;
 }
