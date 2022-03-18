@@ -14,10 +14,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class EventExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity validationErrorException(final MethodArgumentNotValidException e) throws JsonProcessingException {
-
+    public ResponseEntity validationErrorException(final MethodArgumentNotValidException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(HttpStatus.BAD_REQUEST,e.getBindingResult()));
     }
+
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity customErrorException(final CustomException e){
+        return ResponseEntity
+                .status(e.getHttpStatus().value())
+                .body(new ErrorResponse(e));
+    }
+
 }

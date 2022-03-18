@@ -1,16 +1,15 @@
 package com.carrykim.restapi.event.service;
 
-import com.carrykim.restapi.event.infra.EventJpaRepository;
+import com.carrykim.restapi.event.global.exception.CustomException;
 import com.carrykim.restapi.event.infra.EventRepository;
 import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
-import com.carrykim.restapi.event.model.dto.EventResource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.PagedModel;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class EventService {
@@ -28,6 +27,13 @@ public class EventService {
 
     public Page<Event> readWithPage(Pageable pageable){
         return this.eventRepository.findAll(pageable);
+    }
+
+    public Event read(Integer id){
+        Optional<Event> findEvent =  this.eventRepository.findById(id);
+        if(findEvent.isEmpty())
+            throw new CustomException(HttpStatus.NOT_FOUND, "Event not found");
+        return findEvent.get();
     }
 
 }

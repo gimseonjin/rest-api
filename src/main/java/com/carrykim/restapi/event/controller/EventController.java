@@ -49,6 +49,14 @@ public class EventController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity read(@PathVariable Integer id){
+        Event event = this.eventService.read(id);
+        EventResource eventResource = new EventResource(event);
+        addLinks(eventResource);
+        return ResponseEntity.ok(eventResource);
+    }
+
     private void addLinks(EventResource eventResource){
         WebMvcLinkBuilder selfAndUpdateLink =  linkTo(methodOn(EventController.class)
                 .create(new EventDto()))

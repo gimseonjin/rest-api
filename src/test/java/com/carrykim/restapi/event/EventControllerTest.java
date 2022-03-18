@@ -4,6 +4,7 @@ import com.carrykim.restapi.event.infra.EventRepository;
 import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -108,6 +109,31 @@ public class EventControllerTest {
                 .andExpect(jsonPath("_links").exists())
                 .andExpect(jsonPath("page").exists())
                 .andExpect(jsonPath("_embedded.eventResourceList.[0]._links.self").exists());
+    }
+
+    @Test
+    public void get_event_success() throws Exception {
+        Event event = createEvent(0);
+        this.eventRepository.save(event);
+
+        mockMvc.perform(get("/api/events/{id}", event.getId()))
+                .andDo(print())
+                .andExpect(jsonPath("event").exists())
+                .andExpect(jsonPath("_links").exists());
+    }
+
+    @Test
+    public void get_event_not_found_event() throws Exception {
+        //Given
+        Integer wrongId = 10010;
+
+        mockMvc.perform(get("/api/events/{id}", wrongId))
+                .andDo(print())
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("timestamp").exists())
+                .andExpect(jsonPath("status").exists())
+                .andExpect(jsonPath("error").exists())
+                .andExpect(jsonPath("message").exists());
     }
 
 }

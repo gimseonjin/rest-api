@@ -8,6 +8,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,14 @@ public class ErrorResponse {
                     return m;
                 })
                 .collect(Collectors.toList());
+    }
+
+    public ErrorResponse(CustomException customException){
+        this.status = customException.getHttpStatus().value();
+        this.error = customException.getHttpStatus().name();
+
+        this.message = new ArrayList<>();
+        this.message.add(customException.getMessage());
     }
 
 }
