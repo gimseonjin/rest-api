@@ -4,7 +4,6 @@ import com.carrykim.restapi.event.infra.EventRepository;
 import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -67,6 +66,7 @@ public class EventControllerTest {
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE,MediaTypes.HAL_JSON_VALUE))
                 .andExpect(jsonPath("_links.self").exists())
                 .andExpect(jsonPath("_links.query-events").exists())
+                .andExpect(jsonPath("_links.profile").exists())
                 .andExpect(jsonPath("_links.update-event").exists());
     }
 
@@ -106,8 +106,10 @@ public class EventControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.profile").exists())
                 .andExpect(jsonPath("page").exists())
-                .andExpect(jsonPath("_embedded.eventResourceList.[0]._links.self").exists());
+                .andExpect(jsonPath("_embedded.eventResourceList.[0]._links.self").exists())
+                .andExpect(jsonPath("_embedded.eventResourceList.[0]._links.profile").exists());
     }
 
     @Test
@@ -160,7 +162,8 @@ public class EventControllerTest {
                 .andDo(print())
                 .andExpect(jsonPath("event.name").value(event.getName()))
                 .andExpect(jsonPath("event.description").value(newDescription))
-                .andExpect(jsonPath("_links").exists());
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.profile").exists());
     }
 
     @Test
