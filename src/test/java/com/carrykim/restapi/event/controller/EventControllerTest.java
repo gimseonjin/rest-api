@@ -1,4 +1,4 @@
-package com.carrykim.restapi.event;
+package com.carrykim.restapi.event.controller;
 
 import com.carrykim.restapi.event.infra.EventRepository;
 import com.carrykim.restapi.event.model.Event;
