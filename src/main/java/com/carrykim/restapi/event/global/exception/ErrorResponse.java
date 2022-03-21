@@ -1,12 +1,9 @@
 package com.carrykim.restapi.event.global.exception;
 
-import lombok.Builder;
 import lombok.Getter;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
