@@ -2,6 +2,7 @@ package com.carrykim.restapi.event.global.exception;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
-public class ErrorResponse {
+public class ErrorResponse extends RepresentationModel {
 
     private final LocalDateTime timestamp = LocalDateTime.now();
     private int status;

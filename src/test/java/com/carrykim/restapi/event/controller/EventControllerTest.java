@@ -87,7 +87,8 @@ public class EventControllerTest {
                 .andExpect(jsonPath("timestamp").exists())
                 .andExpect(jsonPath("status").exists())
                 .andExpect(jsonPath("error").exists())
-                .andExpect(jsonPath("message").exists());
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("_links.index").exists());
     }
 
     @Test
@@ -141,7 +142,8 @@ public class EventControllerTest {
                 .andExpect(jsonPath("timestamp").exists())
                 .andExpect(jsonPath("status").exists())
                 .andExpect(jsonPath("error").exists())
-                .andExpect(jsonPath("message").exists());
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("_links.index").exists());
     }
 
     @Test
@@ -187,7 +189,8 @@ public class EventControllerTest {
                 .andExpect(jsonPath("timestamp").exists())
                 .andExpect(jsonPath("status").exists())
                 .andExpect(jsonPath("error").exists())
-                .andExpect(jsonPath("message").exists());
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("_links.index").exists());
     }
 
     @Test
@@ -206,7 +209,8 @@ public class EventControllerTest {
                 .andExpect(jsonPath("timestamp").exists())
                 .andExpect(jsonPath("status").exists())
                 .andExpect(jsonPath("error").exists())
-                .andExpect(jsonPath("message").exists());
+                .andExpect(jsonPath("message").exists())
+                .andExpect(jsonPath("_links.index").exists());
     }
 
 }
