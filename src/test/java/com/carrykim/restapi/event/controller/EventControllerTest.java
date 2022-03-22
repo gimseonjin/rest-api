@@ -1,9 +1,15 @@
 package com.carrykim.restapi.event.controller;
 
+import com.carrykim.restapi.accounts.infra.UserRepository;
+import com.carrykim.restapi.accounts.model.Account;
+import com.carrykim.restapi.accounts.model.AccountRole;
+import com.carrykim.restapi.accounts.service.AccountService;
 import com.carrykim.restapi.event.infra.EventRepository;
 import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -11,11 +17,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
+import org.springframework.security.web.authentication.preauth.j2ee.J2eeBasedPreAuthenticatedWebAuthenticationDetailsSource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Set;
 import java.util.stream.IntStream;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -34,6 +44,12 @@ public class EventControllerTest {
     @Autowired
     private EventRepository eventRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private AccountService accountService;
+
 
     private EventDto createEventDto(){
         return EventDto.builder()
@@ -49,6 +65,37 @@ public class EventControllerTest {
                 .build();
     }
 
+    public Account createAccount(){
+        return Account.builder()
+                .name("kimseonjin616")
+                .password("password")
+                .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+                .build();
+    }
+
+    public String getToken() throws Exception {
+        String clientId = "myapp";
+        String clientSecret = "pass";
+        Account account = createAccount();
+        accountService.create(account);
+
+        var response =  mockMvc.perform(post("/oauth/token")
+                        .with(httpBasic(clientId, clientSecret))
+                        .param("username", account.getUsername())
+                        .param("password", "password")
+                        .param("grant_type", "password")
+                );
+        var responseString = response.andReturn().getResponse().getContentAsString();
+        Jackson2JsonParser paser = new Jackson2JsonParser();
+        return "Bearer " + paser.parseMap(responseString).get("access_token").toString();
+    }
+
+    @BeforeEach
+    public void setUp(){
+        eventRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     public void create_event_success() throws Exception {
         //Given
@@ -58,6 +105,7 @@ public class EventControllerTest {
         //Then
         mockMvc.perform(post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, getToken())
                         .accept(MediaTypes.HAL_JSON)
                         .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
@@ -80,6 +128,7 @@ public class EventControllerTest {
         //Then
         mockMvc.perform(post("/api/events")
                         .contentType(MediaType.APPLICATION_JSON)
+                        .header(HttpHeaders.AUTHORIZATION, getToken())
                         .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
                 .andExpect(status().isBadRequest())
@@ -160,6 +209,7 @@ public class EventControllerTest {
         //When
         //Then
         mockMvc.perform(put("/api/events/{id}", event.getId())
+                        .header(HttpHeaders.AUTHORIZATION, getToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
@@ -181,6 +231,7 @@ public class EventControllerTest {
         //When
         //Then
         mockMvc.perform(put("/api/events/{id}", event.getId())
+                        .header(HttpHeaders.AUTHORIZATION, getToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())
@@ -201,6 +252,7 @@ public class EventControllerTest {
         //When
         //Then
         mockMvc.perform(put("/api/events/{id}", wrongId)
+                        .header(HttpHeaders.AUTHORIZATION, getToken())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())

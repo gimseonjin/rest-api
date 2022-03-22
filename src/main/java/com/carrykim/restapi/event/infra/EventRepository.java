@@ -9,4 +9,5 @@ public interface EventRepository {
     Event save(Event event);
     Page<Event> findAll(Pageable pageable);
     Optional<Event> findById(Integer id);
+    void deleteAll();
 }
