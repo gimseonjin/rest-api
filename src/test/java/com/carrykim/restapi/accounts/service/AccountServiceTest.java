@@ -31,7 +31,7 @@ class AccountServiceTest {
     PasswordEncoder passwordEncoder;
 
 
-    public Account creatAccount(){
+    public Account createAccount(){
         return Account.builder()
                 .name("kimseonjin616")
                 .password("password")
@@ -41,7 +41,7 @@ class AccountServiceTest {
 
     @Test
     public void find_by_username_success(){
-        Account account = creatAccount();
+        Account account = createAccount();
         accountService.create(account);
 
         UserDetails userdetails = accountService.loadUserByUsername(account.getName());
