@@ -1,4 +1,4 @@
-package com.carrykim.restapi.event.global.exception;
+package com.carrykim.restapi.common.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

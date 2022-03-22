@@ -1,6 +1,6 @@
 package com.carrykim.restapi.event.service;
 
-import com.carrykim.restapi.event.global.exception.CustomException;
+import com.carrykim.restapi.common.exception.CustomException;
 import com.carrykim.restapi.event.infra.EventRepository;
 import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;

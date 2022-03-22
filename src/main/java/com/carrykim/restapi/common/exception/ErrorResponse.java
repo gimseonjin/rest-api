@@ -1,4 +1,4 @@
-package com.carrykim.restapi.event.global.exception;
+package com.carrykim.restapi.common.exception;
 
 import lombok.Getter;
 import org.springframework.hateoas.RepresentationModel;
@@ -35,6 +35,14 @@ public class ErrorResponse extends RepresentationModel {
 
         this.message = new ArrayList<>();
         this.message.add(customException.getMessage());
+    }
+
+    public ErrorResponse(HttpStatus httpStatus , String message) {
+        this.status = httpStatus.value();
+        this.error = httpStatus.name();
+
+        this.message = new ArrayList<>();
+        this.message.add(message);
     }
 
 }

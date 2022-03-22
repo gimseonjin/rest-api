@@ -1,4 +1,4 @@
-package com.carrykim.restapi.event.global.exception;
+package com.carrykim.restapi.common.exception;
 
 import com.carrykim.restapi.index.controller.IndexController;
 import org.springframework.http.HttpStatus;
