@@ -4,6 +4,7 @@ import com.carrykim.restapi.common.exception.CustomException;
 import com.carrykim.restapi.event.infra.EventRepository;
 import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -14,11 +15,8 @@ import java.util.Optional;
 @Service
 public class EventService {
 
-    private final EventRepository eventRepository;
-
-    public EventService(EventRepository eventRepository) {
-        this.eventRepository = eventRepository;
-    }
+    @Autowired
+    private EventRepository eventRepository;
 
     public Event create(EventDto eventDto){
         Event newEvent = eventDto.toModel();
@@ -38,8 +36,7 @@ public class EventService {
 
     public Event update(Integer id, EventDto eventDto){
         Event event = this.read(id);
-        event.setName(eventDto.getName());
-        event.setDescription(eventDto.getDescription());
+        event.update(eventDto);
         return this.eventRepository.save(event);
     }
 

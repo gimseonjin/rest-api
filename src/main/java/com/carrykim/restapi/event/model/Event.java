@@ -1,6 +1,7 @@
 package com.carrykim.restapi.event.model;
 
 import com.carrykim.restapi.accounts.model.Account;
+import com.carrykim.restapi.event.model.dto.EventDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -19,4 +20,9 @@ public class Event {
 
     @ManyToOne
     private Account manager;
+
+    public void update(EventDto eventDto){
+        this.setName(eventDto.getName());
+        this.setDescription(eventDto.getDescription());
+    }
 }
