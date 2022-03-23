@@ -38,9 +38,7 @@ public class EventController {
         Event event = this.eventService.create(eventDto);
         EventResource eventResource = new EventResource(event);
         addLinks(eventResource, "/swagger-ui/index.html#/Event%20Controller/createUsingPOST");
-        URI uri = linkTo(methodOn(EventController.class)
-                .create(new EventDto()))
-                .slash(eventResource.getEvent().getId()).toUri();
+        URI uri = getCreateAndUpdateLink(eventResource).toUri();
         return ResponseEntity.created(uri).body(eventResource);
     }
 
@@ -76,14 +74,35 @@ public class EventController {
     }
 
     private void addLinks(EventResource eventResource, String profileLink){
-        WebMvcLinkBuilder selfAndUpdateLink =  linkTo(methodOn(EventController.class)
+        addQueryLink(eventResource);
+        addUpdateLink(eventResource);
+        addSelfLink(eventResource);
+        addProfileLink(eventResource, profileLink);
+    }
+
+    private void addUpdateLink(EventResource eventResource){
+        WebMvcLinkBuilder selfAndUpdateLink = getCreateAndUpdateLink(eventResource);
+        eventResource.add(selfAndUpdateLink.withRel("update-event"));
+    }
+
+    private void addSelfLink(EventResource eventResource){
+        WebMvcLinkBuilder selfAndUpdateLink =  getCreateAndUpdateLink(eventResource);
+        eventResource.add(selfAndUpdateLink.withSelfRel());
+    }
+
+    private void addQueryLink(EventResource eventResource){
+        WebMvcLinkBuilder queryLink =  linkTo(methodOn(EventController.class).getClass());
+        eventResource.add(queryLink.withRel("query-events"));
+    }
+
+    private void addProfileLink(EventResource eventResource, String profileLink){
+        eventResource.add(new Link(getBaseURL() + profileLink,"profile"));
+    }
+
+    private WebMvcLinkBuilder getCreateAndUpdateLink(EventResource eventResource){
+        return linkTo(methodOn(EventController.class)
                 .create(new EventDto()))
                 .slash(eventResource.getEvent().getId());
-        WebMvcLinkBuilder queryLink =  linkTo(methodOn(EventController.class));
-        eventResource.add(queryLink.withRel("query-events"));
-        eventResource.add(selfAndUpdateLink.withRel("update-event"));
-        eventResource.add(selfAndUpdateLink.withSelfRel());
-        eventResource.add(new Link(getBaseURL() + profileLink,"profile"));
     }
 
     private String getBaseURL(){
