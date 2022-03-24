@@ -101,7 +101,7 @@ public class EventController {
     }
 
     private void addQueryLink(EventResource eventResource){
-        WebMvcLinkBuilder queryLink =  linkTo(methodOn(EventController.class).getClass());
+        WebMvcLinkBuilder queryLink =  linkTo(EventController.class);
         eventResource.add(queryLink.withRel("query-events"));
     }
 
