@@ -12,6 +12,7 @@ import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -105,12 +106,8 @@ public class EventController {
         eventResource.add(queryLink.withRel("query-events"));
     }
 
-    private void addProfileLink(EventResource eventResource, String profileLink){
+    private void addProfileLink(RepresentationModel eventResource, String profileLink){
         eventResource.add(new Link(getBaseURL() + profileLink,"profile"));
-    }
-
-    private void addProfileLink(PagedModel pagedModel, String profileLink){
-        pagedModel.add(new Link(getBaseURL() + profileLink,"profile"));
     }
 
     private WebMvcLinkBuilder getCreateAndUpdateLink(EventResource eventResource){
