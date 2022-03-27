@@ -7,6 +7,7 @@ import com.carrykim.restapi.event.service.EventService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.Link;
@@ -32,12 +33,23 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
+    @Value("${swagger.event.create}")
+    private String swaggerCreateEventURL;
+
+    @Value("${swagger.event.update}")
+    private String swaggerUpdateEventURL;
+
+    @Value("${swagger.event.readAll}")
+    private String swaggerReadAllEventURL;
+
+    @Value("${swagger.event.read}")
+    private String swaggerReadEventURL;
+
     @ApiOperation(value = "Event 객체를 추가하는 메소드")
     @PostMapping("")
     public ResponseEntity create(@RequestBody @Valid EventDto eventDto) {
         Event event = this.eventService.create(eventDto);
-        EventResource eventResource = createEventResource(event,
-                "/swagger-ui/index.html#/Event%20Controller/createUsingPOST");
+        EventResource eventResource = createEventResource(event, swaggerCreateEventURL);
         URI uri = getCreateAndUpdateLink(eventResource).toUri();
         return ResponseEntity.created(uri).body(eventResource);
     }
@@ -46,8 +58,7 @@ public class EventController {
     @GetMapping("")
     public ResponseEntity readAll(Pageable pageable, PagedResourcesAssembler pagedResourcesAssembler) {
         var result =  createPagingModel(pageable, pagedResourcesAssembler);
-        addProfileLink(result,
-                "/swagger-ui/index.html#/Event%20Controller/readAllUsingGET");
+        addProfileLink(result, swaggerUpdateEventURL);
         return ResponseEntity.ok(result);
     }
 
@@ -55,8 +66,7 @@ public class EventController {
     @GetMapping("/{id}")
     public ResponseEntity read(@PathVariable Integer id){
         Event event = this.eventService.read(id);
-        EventResource eventResource = createEventResource(event,
-                "/swagger-ui/index.html#/Event%20Controller/readUsingGET");
+        EventResource eventResource = createEventResource(event, swaggerReadAllEventURL);
         return ResponseEntity.ok(eventResource);
     }
 
@@ -64,8 +74,7 @@ public class EventController {
     @PutMapping("/{id}")
     public ResponseEntity update(@RequestBody @Valid EventDto eventDto, @PathVariable Integer id){
         Event event = this.eventService.update(id, eventDto);
-        EventResource eventResource = createEventResource(event,
-                "/swagger-ui/index.html#/Event%20Controller/updateUsingPUT");
+        EventResource eventResource = createEventResource(event, swaggerReadEventURL);
         return ResponseEntity.ok(eventResource);
     }
 
@@ -78,8 +87,7 @@ public class EventController {
     private PagedModel createPagingModel(Pageable pageable, PagedResourcesAssembler pagedResourcesAssembler){
         return pagedResourcesAssembler
                 .toModel(this.eventService.readWithPage(pageable).map(event -> {
-                    EventResource eventResource = createEventResource(event,
-                            "/swagger-ui/index.html#/Event%20Controller/readUsingGET");
+                    EventResource eventResource = createEventResource(event, swaggerReadEventURL);
                     return eventResource;
                 }));
     }

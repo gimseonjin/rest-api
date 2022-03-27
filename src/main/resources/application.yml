@@ -25,3 +25,11 @@ logging:
           descriptor:
             sql:
               BasicBinder : TRACE
+
+swagger:
+  index: /swagger-ui/index.html#
+  event:
+    create: /swagger-ui/index.html#/Event%20Controller/createUsingPOST
+    readAll: /swagger-ui/index.html#/Event%20Controller/readAllUsingGET
+    read: /swagger-ui/index.html#/Event%20Controller/readUsingGET
+    update : /swagger-ui/index.html#/Event%20Controller/updateUsingPUT
