@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ public class EventService {
     @Autowired
     private EventRepository eventRepository;
 
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public Event create(EventDto eventDto){
         Event newEvent = eventDto.toModel();
         newEvent.setManager(getPrincipal());
@@ -36,6 +38,7 @@ public class EventService {
         return findEvent.get();
     }
 
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public Event update(Integer id, EventDto eventDto){
         Event event = this.read(id);
         validEventManager(event);
