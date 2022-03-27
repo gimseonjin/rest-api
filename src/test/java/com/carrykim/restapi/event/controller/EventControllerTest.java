@@ -65,6 +65,14 @@ public class EventControllerTest {
                 .build();
     }
 
+    private Event createEvent(int i, Account account){
+        return Event.builder()
+                .name("My Event : " + i)
+                .description("This is my first Event")
+                .manager(account)
+                .build();
+    }
+
     public Account createAccount(){
         return Account.builder()
                 .name("kimseonjin616")
@@ -85,6 +93,21 @@ public class EventControllerTest {
                         .param("password", "password")
                         .param("grant_type", "password")
                 );
+        var responseString = response.andReturn().getResponse().getContentAsString();
+        Jackson2JsonParser paser = new Jackson2JsonParser();
+        return "Bearer " + paser.parseMap(responseString).get("access_token").toString();
+    }
+
+    public String getToken(Account account) throws Exception {
+        String clientId = "myapp";
+        String clientSecret = "pass";
+
+        var response =  mockMvc.perform(post("/oauth/token")
+                .with(httpBasic(clientId, clientSecret))
+                .param("username", account.getUsername())
+                .param("password", "password")
+                .param("grant_type", "password")
+        );
         var responseString = response.andReturn().getResponse().getContentAsString();
         Jackson2JsonParser paser = new Jackson2JsonParser();
         return "Bearer " + paser.parseMap(responseString).get("access_token").toString();
@@ -118,6 +141,8 @@ public class EventControllerTest {
                 .andExpect(jsonPath("_links.profile").exists())
                 .andExpect(jsonPath("_links.update-event").exists());
     }
+
+
 
     @Test
     public void create_event_bad_request_empty_input() throws Exception {
@@ -178,6 +203,23 @@ public class EventControllerTest {
     }
 
     @Test
+    public void get_event_success_with_token() throws Exception {
+        //Given
+        Event event = createEvent(0);
+        this.eventRepository.save(event);
+
+        //When
+        //Then
+        mockMvc.perform(get("/api/events/{id}", event.getId())
+                        .header(HttpHeaders.AUTHORIZATION, getToken())
+                )
+                .andDo(print())
+                .andExpect(jsonPath("event").exists())
+                .andExpect(jsonPath("_links").exists())
+                .andExpect(jsonPath("_links.create-events").exists());
+    }
+
+    @Test
     public void get_event_not_found_event() throws Exception {
         //Given
         Integer wrongId = 10010;
@@ -197,8 +239,10 @@ public class EventControllerTest {
     @Test
     public void update_event_success() throws Exception {
         //Given
-        Event event = createEvent(11123);
-        this.eventRepository.save(event);
+        Account account = createAccount();
+        Event event = createEvent(11123, account);
+        accountService.create(account);
+        eventRepository.save(event);
         String newDescription = "new description";
 
         EventDto eventDto = EventDto.builder()
@@ -209,7 +253,7 @@ public class EventControllerTest {
         //When
         //Then
         mockMvc.perform(put("/api/events/{id}", event.getId())
-                        .header(HttpHeaders.AUTHORIZATION, getToken())
+                        .header(HttpHeaders.AUTHORIZATION, getToken(account))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(eventDto)))
                 .andDo(print())

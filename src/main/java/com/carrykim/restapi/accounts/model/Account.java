@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 @Entity
 @Getter @Setter @Builder
 @NoArgsConstructor @AllArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Account implements UserDetails{
     @Id @GeneratedValue
     private Integer id;

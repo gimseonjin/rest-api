@@ -1,5 +1,6 @@
 package com.carrykim.restapi.event.controller;
 
+import com.carrykim.restapi.accounts.model.Account;
 import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
 import com.carrykim.restapi.event.model.dto.EventResource;
@@ -16,6 +17,8 @@ import org.springframework.hateoas.PagedModel;
 import org.springframework.hateoas.RepresentationModel;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -48,9 +51,10 @@ public class EventController {
     @ApiOperation(value = "Event 객체를 추가하는 메소드")
     @PostMapping("")
     public ResponseEntity create(@RequestBody @Valid EventDto eventDto) {
+
         Event event = this.eventService.create(eventDto);
         EventResource eventResource = createEventResource(event, swaggerCreateEventURL);
-        URI uri = getCreateAndUpdateLink(eventResource).toUri();
+        URI uri = getSelfAndUpdateLink(eventResource).toUri();
         return ResponseEntity.created(uri).body(eventResource);
     }
 
@@ -93,19 +97,25 @@ public class EventController {
     }
 
     private void addLinks(EventResource eventResource, String profileLink){
+        var principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if(principal.getClass().equals(Account.class)){
+            addCreateLink(eventResource);
+            addUpdateLink(eventResource);
+        }
+
         addQueryLink(eventResource);
-        addUpdateLink(eventResource);
         addSelfLink(eventResource);
         addProfileLink(eventResource, profileLink);
     }
 
     private void addUpdateLink(EventResource eventResource){
-        WebMvcLinkBuilder selfAndUpdateLink = getCreateAndUpdateLink(eventResource);
+        WebMvcLinkBuilder selfAndUpdateLink = getSelfAndUpdateLink(eventResource);
         eventResource.add(selfAndUpdateLink.withRel("update-event"));
     }
 
     private void addSelfLink(EventResource eventResource){
-        WebMvcLinkBuilder selfAndUpdateLink =  getCreateAndUpdateLink(eventResource);
+        WebMvcLinkBuilder selfAndUpdateLink =  getSelfAndUpdateLink(eventResource);
         eventResource.add(selfAndUpdateLink.withSelfRel());
     }
 
@@ -114,11 +124,16 @@ public class EventController {
         eventResource.add(queryLink.withRel("query-events"));
     }
 
+    private void addCreateLink(RepresentationModel eventResource){
+        WebMvcLinkBuilder queryLink =  linkTo(methodOn(EventController.class).create(new EventDto()));
+        eventResource.add(queryLink.withRel("create-events"));
+    }
+
     private void addProfileLink(RepresentationModel eventResource, String profileLink){
         eventResource.add(new Link(getBaseURL() + profileLink,"profile"));
     }
 
-    private WebMvcLinkBuilder getCreateAndUpdateLink(EventResource eventResource){
+    private WebMvcLinkBuilder getSelfAndUpdateLink(EventResource eventResource){
         return linkTo(methodOn(EventController.class)
                 .create(new EventDto()))
                 .slash(eventResource.getEvent().getId());

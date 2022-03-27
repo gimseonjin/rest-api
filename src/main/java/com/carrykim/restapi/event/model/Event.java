@@ -1,7 +1,11 @@
 package com.carrykim.restapi.event.model;
 
 import com.carrykim.restapi.accounts.model.Account;
+import com.carrykim.restapi.common.serializer.AccountSerializer;
 import com.carrykim.restapi.event.model.dto.EventDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 
 import javax.persistence.*;
@@ -19,6 +23,7 @@ public class Event {
     private String description;
 
     @ManyToOne
+    @JsonSerialize(using = AccountSerializer.class)
     private Account manager;
 
     public void update(EventDto eventDto){
