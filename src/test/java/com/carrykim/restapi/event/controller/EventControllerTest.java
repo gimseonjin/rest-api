@@ -1,6 +1,6 @@
 package com.carrykim.restapi.event.controller;
 
-import com.carrykim.restapi.accounts.infra.UserRepository;
+import com.carrykim.restapi.accounts.infra.AccountRepository;
 import com.carrykim.restapi.accounts.model.Account;
 import com.carrykim.restapi.accounts.model.AccountRole;
 import com.carrykim.restapi.accounts.service.AccountService;
@@ -8,7 +8,6 @@ import com.carrykim.restapi.event.infra.EventRepository;
 import com.carrykim.restapi.event.model.Event;
 import com.carrykim.restapi.event.model.dto.EventDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.common.util.Jackson2JsonParser;
-import org.springframework.security.web.authentication.preauth.j2ee.J2eeBasedPreAuthenticatedWebAuthenticationDetailsSource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -45,7 +43,7 @@ public class EventControllerTest {
     private EventRepository eventRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private AccountRepository userRepository;
 
     @Autowired
     private AccountService accountService;
@@ -140,6 +138,21 @@ public class EventControllerTest {
                 .andExpect(jsonPath("_links.query-events").exists())
                 .andExpect(jsonPath("_links.profile").exists())
                 .andExpect(jsonPath("_links.update-event").exists());
+    }
+
+    @Test
+    public void create_event_unauthorized_without_token() throws Exception {
+        //Given
+        EventDto eventDto = createEventDto();
+
+        //When
+        //Then
+        mockMvc.perform(post("/api/events")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaTypes.HAL_JSON)
+                        .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 
 
@@ -261,6 +274,59 @@ public class EventControllerTest {
                 .andExpect(jsonPath("event.description").value(newDescription))
                 .andExpect(jsonPath("_links").exists())
                 .andExpect(jsonPath("_links.profile").exists());
+    }
+
+    @Test
+    public void update_event_unauthorized_without_token() throws Exception {
+        //Given
+        Account account = createAccount();
+        Event event = createEvent(11123423, account);
+        accountService.create(account);
+        eventRepository.save(event);
+        String newDescription = "new description";
+
+        EventDto eventDto = EventDto.builder()
+                .name(event.getName())
+                .description(newDescription)
+                .build();
+
+        //When
+        //Then
+        mockMvc.perform(put("/api/events/{id}", event.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void update_event_unauthorized_wrong_account() throws Exception {
+        //Given
+        Account account = createAccount();
+        Account wrongAccount = Account.builder()
+                .name("wrong")
+                .password("password")
+                .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
+                .build();
+        Event event = createEvent(111234123, account);
+        accountService.create(account);
+        accountService.create(wrongAccount);
+        eventRepository.save(event);
+        String newDescription = "new description";
+
+        EventDto eventDto = EventDto.builder()
+                .name(event.getName())
+                .description(newDescription)
+                .build();
+
+        //When
+        //Then
+        mockMvc.perform(put("/api/events/{id}", event.getId())
+                        .header(HttpHeaders.AUTHORIZATION, getToken(wrongAccount))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(eventDto)))
+                .andDo(print())
+                .andExpect(status().isUnauthorized());
     }
 
     @Test

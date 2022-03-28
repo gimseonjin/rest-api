@@ -1,12 +1,10 @@
 package com.carrykim.restapi.accounts.service;
 
-import com.carrykim.restapi.accounts.infra.UserRepository;
+import com.carrykim.restapi.accounts.infra.AccountRepository;
 import com.carrykim.restapi.accounts.model.Account;
 import com.carrykim.restapi.accounts.model.AccountRole;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,13 +22,6 @@ class AccountServiceTest {
     @Autowired
     AccountService accountService;
 
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-
     public Account createAccount(){
         return Account.builder()
                 .name("kimseonjin616")
@@ -46,7 +37,7 @@ class AccountServiceTest {
 
         UserDetails userdetails = accountService.loadUserByUsername(account.getName());
 
-        assertEquals(userdetails.getUsername(), account.getName());
+        assertEquals(account.getUsername(), userdetails.getUsername());
         assertEquals(account.getPassword(), userdetails.getPassword());
     }
 
